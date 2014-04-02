@@ -1,0 +1,43 @@
+drop table GitStatsTable;
+
+drop table summarizedGitTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS GitStatsTable (key STRING, payload_repositoryID STRING, payload_ownerID STRING,payload_totalNumberOfCommits STRING,
+payload_totalPullRequests STRING,payload_topContributor STRING,payload_lastCommitDateTime STRING, payload_commitsThisMonth STRING , payload_commitLastYear STRING) STORED BY 
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = "GitHub_Stream",
+"cassandra.columns.mapping" = ":key,payload_repositoryID,payload_ownerID,payload_totalNumberOfCommits,payload_totalPullRequests,payload_topContributor,payload_lastCommitDateTime,
+ payload_commitsThisMonth, payload_commitLastYear" );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+summarizedGitTable( payload_repositoryID STRING, payload_ownerID STRING,payload_totalNumberOfCommits STRING,
+payload_totalPullRequests STRING,payload_topContributor STRING,payload_lastCommitDateTime STRING, payload_commitsThisMonth STRING,payload_commitLastYear STRING ) 
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_repositoryID',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE GitSummary ( payload_repositoryID VARCHAR(50) PRIMARY KEY, payload_ownerID VARCHAR(50),payload_totalNumberOfCommits VARCHAR(50),
+payload_totalPullRequests VARCHAR(50),payload_topContributor VARCHAR(50),payload_lastCommitDateTime VARCHAR(50), payload_commitsThisMonth VARCHAR(50) ,
+ payload_commitLastYear varchar(300))');
+
+
+insert overwrite table summarizedGitTable SELECT payload_repositoryID , payload_ownerID  ,payload_totalNumberOfCommits  ,
+payload_totalPullRequests  ,payload_topContributor  ,payload_lastCommitDateTime  , payload_commitsThisMonth,payload_commitLastYear FROM GitStatsTable
+
+                                    

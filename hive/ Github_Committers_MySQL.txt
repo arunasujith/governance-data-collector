@@ -1,0 +1,38 @@
+drop table GitCommittersTable;
+
+drop table summarizedGitCommittersTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS GitCommittersTable (key STRING, payload_repositoryID STRING, payload_committerName STRING,payload_numberofCommits STRING ) STORED BY 
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = "GitHub_Committers_Stream", 	 
+"cassandra.columns.mapping" = ":key,payload_repositoryID  , payload_committerName  ,payload_numberofCommits " );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+summarizedGitCommittersTable( payload_repositoryID STRING, payload_committerName STRING,payload_numberofCommits STRING ) 
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_repositoryID,payload_committerName',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE GitCommittersSummary (payload_repositoryID varchar(50), payload_committerName varchar(50), payload_numberofCommits int(10),
+                 PRIMARY KEY(payload_repositoryID,payload_committerName) )');
+
+
+insert overwrite table summarizedGitCommittersTable SELECT payload_repositoryID  , payload_committerName  ,payload_numberofCommits FROM GitCommittersTable
+
+                                    

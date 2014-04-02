@@ -1,0 +1,41 @@
+drop table JenkinsStatsTable;
+
+drop table SummarizedJenkinsTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsStatsTable (key STRING, payload_projectID STRING, payload_planName  STRING, payload_planID STRING,
+payload_buildNumber STRING,payload_buildDate STRING,payload_buildState STRING, payload_relativeBuildDate STRING , payload_successRate STRING) STORED BY
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = "Jenkins_Stream",
+"cassandra.columns.mapping" = ":key,payload_projectID,payload_planName,payload_planID,payload_buildNumber,payload_buildDate,payload_buildState,
+ payload_relativeBuildDate, payload_successRate" );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+SummarizedJenkinsTable( payload_projectID STRING, payload_planName  STRING, payload_planID STRING,
+payload_buildNumber STRING,payload_buildDate STRING,payload_buildState STRING, payload_relativeBuildDate STRING , payload_successRate STRING )
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_planName',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsSummary ( payload_projectID VARCHAR(50), payload_planName  VARCHAR(50) PRIMARY KEY, payload_planID VARCHAR(50),
+payload_buildNumber VARCHAR(50),payload_buildDate VARCHAR(50),payload_buildState VARCHAR(50), payload_relativeBuildDate VARCHAR(50) , payload_successRate VARCHAR(50) )');
+
+ insert overwrite table SummarizedJenkinsTable  SELECT payload_projectID , payload_planName   , payload_planID  ,
+payload_buildNumber  ,payload_buildDate  ,payload_buildState  , payload_relativeBuildDate   , payload_successRate   FROM JenkinsStatsTable ORDER BY payload_buildDate
+
+                                    

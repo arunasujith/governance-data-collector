@@ -1,0 +1,36 @@
+drop table JenkinsBuildRulesStatsTable;
+
+drop table summarizedJenkinsBuildRulesStatsTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsBuildRulesStatsTable (key STRING, payload_buildID STRING, payload_totalRuleCount STRING, payload_executedRuleCount STRING, payload_inactiveRuleCount STRING, payload_excludedRuleCount STRING, payload_mavenVersionIncompatibleRuleCount STRING, payload_skippedExplicitRuleCount STRING) STORED BY 
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = "Jenkins_Build_Rule_Stat_Stream",
+"cassandra.columns.mapping" = ":key  , payload_buildID , payload_totalRuleCount , payload_executedRuleCount , payload_inactiveRuleCount , payload_excludedRuleCount , payload_mavenVersionIncompatibleRuleCount , payload_skippedExplicitRuleCount " );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+summarizedJenkinsBuildRulesStatsTable(payload_buildID STRING, payload_totalRuleCount STRING, payload_executedRuleCount STRING, payload_inactiveRuleCount STRING, payload_excludedRuleCount STRING, payload_mavenVersionIncompatibleRuleCount STRING, payload_skippedExplicitRuleCount STRING ) 
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_buildID',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsBuildRulesStatsSummary ( payload_buildID varchar(100), payload_totalRuleCount varchar(20), payload_executedRuleCount varchar(20), payload_inactiveRuleCount varchar(20), payload_excludedRuleCount varchar(20), payload_mavenVersionIncompatibleRuleCount varchar(20), payload_skippedExplicitRuleCount varchar(20))');
+
+
+insert overwrite table summarizedJenkinsBuildRulesStatsTable SELECT payload_buildID , payload_totalRuleCount , payload_executedRuleCount , payload_inactiveRuleCount , payload_excludedRuleCount , payload_mavenVersionIncompatibleRuleCount , payload_skippedExplicitRuleCount FROM JenkinsBuildRulesStatsTable
+      

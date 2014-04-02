@@ -1,0 +1,40 @@
+drop table JenkinsCommitsTable;
+
+drop table SummarizedJenkinsCommitsTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsCommitsTable (key STRING, payload_planID STRING ,payload_changesetID STRING, payload_commitAuthor STRING , payload_date STRING, 
+payload_comment STRING ) STORED BY 
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = " Jenkins_Commits_Stream",
+"cassandra.columns.mapping" = ":key,payload_planID ,payload_changesetID , payload_commitAuthor , payload_date  , payload_comment  " );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+SummarizedJenkinsCommitsTable( payload_planID STRING ,payload_changesetID STRING, payload_commitAuthor STRING , payload_date STRING, 
+payload_comment STRING) 
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+		
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_planID,payload_changesetID',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsCommitsSummary (  payload_planID varchar(50) ,payload_changesetID varchar(50), payload_commitAuthor varchar(50) 
+, payload_date varchar(50), payload_comment varchar(2000), PRIMARY KEY(payload_planID, payload_changesetID ) )');
+ 
+ 
+insert overwrite table SummarizedJenkinsCommitsTable SELECT payload_planID ,payload_changesetID , payload_commitAuthor , payload_date  , payload_comment  FROM JenkinsCommitsTable
+
+                                    

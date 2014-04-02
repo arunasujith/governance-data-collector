@@ -1,0 +1,39 @@
+drop table JenkinsRulesTable;
+
+drop table summarizedJenkinsRulesTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsRulesTable (key STRING, payload_buildID STRING, payload_componentName STRING,payload_ruleName STRING,
+payload_status STRING) STORED BY 
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = "Jenkins_Build_Rule_Stream",
+"cassandra.columns.mapping" = ":key  , payload_buildID  , payload_componentName  ,payload_ruleName  ,payload_status " );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+summarizedJenkinsRulesTable(payload_buildID STRING, payload_componentName STRING,payload_ruleName STRING,
+payload_status STRING ) 
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_buildID,payload_componentName,payload_ruleName',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsBuildRulesSummary ( payload_buildID varchar(50), payload_componentName varchar(100),payload_ruleName varchar(100),
+payload_status varchar(50), PRIMARY KEY(payload_buildID , payload_componentName , payload_ruleName))');
+
+
+insert overwrite table summarizedJenkinsRulesTable SELECT payload_buildID  , payload_componentName  ,payload_ruleName  ,payload_status FROM JenkinsRulesTable
+      

@@ -1,0 +1,52 @@
+drop table BambooEmmaTable;
+
+drop table SummarizedBambooEmmaTable;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS BambooEmmaTable (key STRING, payload_reportID STRING ,payload_packageName STRING, payload_numberOfPackages STRING , payload_numberOfClasses STRING, 
+payload_numberOfMethods STRING , payload_numberOfBlocks STRING , payload_numberOfLines	STRING, 
+payload_numberOfFiles STRING, payload_allClassCoverage STRING,  payload_allMethodCoverage STRING , payload_allBlockCoverage STRING, payload_allLineCoverage	 STRING,  
+ payload_classCoverage STRING, payload_methodCoverage STRING, payload_blockCoverage STRING, payload_lineCoverage STRING) STORED BY 
+'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
+"wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
+"cassandra.cf.name" = "Bamboo_Emma_Stream",
+"cassandra.columns.mapping" = ":key,payload_reportID ,  payload_packageName  , payload_numberOfPackages   , payload_numberOfClasses  , payload_numberOfMethods   , payload_numberOfBlocks   , payload_numberOfLines , 
+payload_numberOfFiles  , payload_allClassCoverage  ,  payload_allMethodCoverage   , payload_allBlockCoverage  , payload_allLineCoverage	   ,
+payload_classCoverage  , payload_methodCoverage  , payload_blockCoverage  , payload_lineCoverage" );
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS
+
+SummarizedBambooEmmaTable( payload_reportID STRING , payload_packageName STRING, payload_numberOfPackages STRING , payload_numberOfClasses STRING, 
+payload_numberOfMethods STRING , payload_numberOfBlocks STRING , payload_numberOfLines	STRING, 
+payload_numberOfFiles STRING, payload_allClassCoverage STRING,  payload_allMethodCoverage STRING , payload_allBlockCoverage STRING, payload_allLineCoverage	 STRING,  
+ payload_classCoverage STRING, payload_methodCoverage STRING, payload_blockCoverage STRING, payload_lineCoverage STRING ) 
+
+STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
+
+    TBLPROPERTIES (
+		
+                'mapred.jdbc.driver.class' = 'com.mysql.jdbc.Driver',
+
+                'mapred.jdbc.url' = 'jdbc:mysql://localhost/greg',
+
+                'mapred.jdbc.username' = 'root',
+
+                'mapred.jdbc.password' = '123',
+
+                'hive.jdbc.update.on.duplicate'= 'true',
+
+                'hive.jdbc.primary.key.fields'='payload_reportID,payload_packageName',
+
+                'hive.jdbc.table.create.query' = 'CREATE TABLE BambooEmmaSummary ( payload_reportID varchar(50) , payload_packageName varchar(200)  ,
+                 payload_numberOfPackages varchar(50)  , payload_numberOfClasses varchar(50) , 
+payload_numberOfMethods varchar(50)  , payload_numberOfBlocks varchar(50)  , payload_numberOfLines	varchar(50) , 
+payload_numberOfFiles varchar(50) , payload_allClassCoverage varchar(50) ,  payload_allMethodCoverage varchar(50)  , payload_allBlockCoverage varchar(50) , 
+payload_allLineCoverage	 varchar(50) ,   payload_classCoverage varchar(50) , payload_methodCoverage varchar(50) , payload_blockCoverage varchar(50) , 
+payload_lineCoverage varchar(50), PRIMARY KEY(payload_reportID, payload_packageName ) )');
+ 
+ 
+insert overwrite table SummarizedBambooEmmaTable SELECT payload_reportID   ,  payload_packageName , payload_numberOfPackages   , payload_numberOfClasses  , payload_numberOfMethods   , payload_numberOfBlocks   
+, payload_numberOfLines , payload_numberOfFiles  , payload_allClassCoverage  ,  payload_allMethodCoverage   , payload_allBlockCoverage  , payload_allLineCoverage	  ,
+payload_classCoverage  , payload_methodCoverage  , payload_blockCoverage  , payload_lineCoverage  FROM BambooEmmaTable
+
+                                    

@@ -7,7 +7,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS GithubCommitsTable (key STRING, payload_repo
 payload_authorName STRING , payload_commitMessage STRING) STORED BY 
 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
 "wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
-"cassandra.cf.name" = " GitHub_Commits_Stream",
+"cassandra.cf.name" = "GitHub_Commits_Stream",
 "cassandra.columns.mapping" = ":key,payload_repositoryID ,  payload_shaValue  , payload_authorDate   , payload_authorEMail  , payload_authorName   , payload_commitMessage" );
 
 

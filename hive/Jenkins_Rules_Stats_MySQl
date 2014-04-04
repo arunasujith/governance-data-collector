@@ -2,16 +2,23 @@ drop table JenkinsBuildRulesStatsTable;
 
 drop table summarizedJenkinsBuildRulesStatsTable;
 
-CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsBuildRulesStatsTable (key STRING, payload_buildID STRING, payload_totalRuleCount STRING, payload_executedRuleCount STRING, payload_inactiveRuleCount STRING, payload_excludedRuleCount STRING, payload_mavenVersionIncompatibleRuleCount STRING, payload_skippedExplicitRuleCount STRING) STORED BY 
+CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsBuildRulesStatsTable (key STRING, payload_buildID STRING,
+payload_totalRuleCount STRING, payload_executedRuleCount STRING, payload_inactiveRuleCount STRING,
+payload_excludedRuleCount STRING, payload_mavenVersionIncompatibleRuleCount STRING, payload_skippedExplicitRuleCount STRING ,
+Time_stamp TIMESTAMP) STORED BY
 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
 "wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
 "cassandra.cf.name" = "Jenkins_Build_Rule_Stat_Stream",
-"cassandra.columns.mapping" = ":key  , payload_buildID , payload_totalRuleCount , payload_executedRuleCount , payload_inactiveRuleCount , payload_excludedRuleCount , payload_mavenVersionIncompatibleRuleCount , payload_skippedExplicitRuleCount " );
+"cassandra.columns.mapping" = ":key  , payload_buildID ,
+payload_totalRuleCount , payload_executedRuleCount , payload_inactiveRuleCount ,
+payload_excludedRuleCount , payload_mavenVersionIncompatibleRuleCount , payload_skippedExplicitRuleCount, Timestamp " );
 
 
 CREATE EXTERNAL TABLE IF NOT EXISTS
 
-summarizedJenkinsBuildRulesStatsTable(payload_buildID STRING, payload_totalRuleCount STRING, payload_executedRuleCount STRING, payload_inactiveRuleCount STRING, payload_excludedRuleCount STRING, payload_mavenVersionIncompatibleRuleCount STRING, payload_skippedExplicitRuleCount STRING ) 
+summarizedJenkinsBuildRulesStatsTable(payload_buildID STRING, payload_totalRuleCount STRING,
+payload_executedRuleCount STRING, payload_inactiveRuleCount STRING, payload_excludedRuleCount STRING,
+ payload_mavenVersionIncompatibleRuleCount STRING, payload_skippedExplicitRuleCount STRING, Time_stamp TIMESTAMP )
 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 
@@ -29,8 +36,15 @@ STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 
                 'hive.jdbc.primary.key.fields'='payload_buildID',
 
-                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsBuildRulesStatsSummary ( payload_buildID varchar(100), payload_totalRuleCount varchar(20), payload_executedRuleCount varchar(20), payload_inactiveRuleCount varchar(20), payload_excludedRuleCount varchar(20), payload_mavenVersionIncompatibleRuleCount varchar(20), payload_skippedExplicitRuleCount varchar(20))');
+                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsBuildRulesStatsSummary
+                ( payload_buildID varchar(100) PRIMARY KEY, payload_totalRuleCount varchar(20),
+                payload_executedRuleCount varchar(20), payload_inactiveRuleCount varchar(20),
+                payload_excludedRuleCount varchar(20), payload_mavenVersionIncompatibleRuleCount varchar(20),
+                 payload_skippedExplicitRuleCount varchar(20) , time_stamp varchar(50))');
 
 
-insert overwrite table summarizedJenkinsBuildRulesStatsTable SELECT payload_buildID , payload_totalRuleCount , payload_executedRuleCount , payload_inactiveRuleCount , payload_excludedRuleCount , payload_mavenVersionIncompatibleRuleCount , payload_skippedExplicitRuleCount FROM JenkinsBuildRulesStatsTable
+insert overwrite table summarizedJenkinsBuildRulesStatsTable SELECT payload_buildID , payload_totalRuleCount ,
+ payload_executedRuleCount , payload_inactiveRuleCount , payload_excludedRuleCount ,
+ payload_mavenVersionIncompatibleRuleCount , payload_skippedExplicitRuleCount , Time_stamp FROM JenkinsBuildRulesStatsTable
+ ORDER BY Time_stamp ASC
       

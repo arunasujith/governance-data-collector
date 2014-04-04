@@ -2,18 +2,19 @@ drop table JenkinsRulesTable;
 
 drop table summarizedJenkinsRulesTable;
 
-CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsRulesTable (key STRING, payload_buildID STRING, payload_componentName STRING,payload_ruleName STRING,
-payload_status STRING) STORED BY 
+CREATE EXTERNAL TABLE IF NOT EXISTS JenkinsRulesTable (key STRING, payload_buildID STRING, payload_componentName STRING,
+payload_ruleName STRING,
+payload_status STRING , Time_stamp TIMESTAMP) STORED BY
 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
 "wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
 "cassandra.cf.name" = "Jenkins_Build_Rule_Stream",
-"cassandra.columns.mapping" = ":key  , payload_buildID  , payload_componentName  ,payload_ruleName  ,payload_status " );
+"cassandra.columns.mapping" = ":key  , payload_buildID  , payload_componentName  ,payload_ruleName  ,payload_status, Timestamp " );
 
 
 CREATE EXTERNAL TABLE IF NOT EXISTS
 
 summarizedJenkinsRulesTable(payload_buildID STRING, payload_componentName STRING,payload_ruleName STRING,
-payload_status STRING ) 
+payload_status STRING ,Time_stamp TIMESTAMP )
 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 
@@ -31,9 +32,11 @@ STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 
                 'hive.jdbc.primary.key.fields'='payload_buildID,payload_componentName,payload_ruleName',
 
-                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsBuildRulesSummary ( payload_buildID varchar(50), payload_componentName varchar(100),payload_ruleName varchar(100),
-payload_status varchar(50), PRIMARY KEY(payload_buildID , payload_componentName , payload_ruleName))');
+                'hive.jdbc.table.create.query' = 'CREATE TABLE JenkinsBuildRulesSummary ( payload_buildID varchar(50),
+                payload_componentName varchar(100),payload_ruleName varchar(100),
+payload_status varchar(50), time_stamp varchar(50) , PRIMARY KEY(payload_buildID , payload_componentName , payload_ruleName))');
 
 
-insert overwrite table summarizedJenkinsRulesTable SELECT payload_buildID  , payload_componentName  ,payload_ruleName  ,payload_status FROM JenkinsRulesTable
+insert overwrite table summarizedJenkinsRulesTable SELECT payload_buildID  , payload_componentName  ,payload_ruleName  ,
+payload_status, Time_Stamp FROM JenkinsRulesTable ORDER BY Time_stamp ASC
       

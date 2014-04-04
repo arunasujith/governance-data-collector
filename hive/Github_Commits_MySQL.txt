@@ -3,18 +3,20 @@ drop table GithubCommitsTable;
 drop table SummarizedGithubCommitsTable;
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS GithubCommitsTable (key STRING, payload_repositoryID STRING ,payload_shaValue STRING, payload_authorDate STRING , payload_authorEMail STRING, 
-payload_authorName STRING , payload_commitMessage STRING) STORED BY 
+CREATE EXTERNAL TABLE IF NOT EXISTS GithubCommitsTable (key STRING, payload_repositoryID STRING ,payload_shaValue STRING,
+ payload_authorDate STRING , payload_authorEMail STRING,
+payload_authorName STRING , payload_commitMessage STRING, Time_stamp TIMESTAMP) STORED BY
 'org.apache.hadoop.hive.cassandra.CassandraStorageHandler' WITH SERDEPROPERTIES (
 "wso2.carbon.datasource.name" = "WSO2BAM_CASSANDRA_DATASOURCE",
 "cassandra.cf.name" = "GitHub_Commits_Stream",
-"cassandra.columns.mapping" = ":key,payload_repositoryID ,  payload_shaValue  , payload_authorDate   , payload_authorEMail  , payload_authorName   , payload_commitMessage" );
+"cassandra.columns.mapping" = ":key,payload_repositoryID ,  payload_shaValue  , payload_authorDate   , payload_authorEMail  ,
+ payload_authorName   , payload_commitMessage, Timestamp" );
 
 
 CREATE EXTERNAL TABLE IF NOT EXISTS
 
 SummarizedGithubCommitsTable( payload_repositoryID STRING ,payload_shaValue STRING, payload_authorDate STRING , payload_authorEMail STRING, 
-payload_authorName STRING , payload_commitMessage STRING) 
+payload_authorName STRING , payload_commitMessage STRING , Time_stamp TIMESTAMP)
 
 STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 
@@ -32,10 +34,13 @@ STORED BY 'org.wso2.carbon.hadoop.hive.jdbc.storage.JDBCStorageHandler'
 
                 'hive.jdbc.primary.key.fields'='payload_repositoryID,payload_shaValue',
 
-                'hive.jdbc.table.create.query' = 'CREATE TABLE GitCommitsSummary ( payload_repositoryID varchar(50) ,payload_shaValue varchar(50), payload_authorDate varchar(50) ,
- 				payload_authorEMail varchar(50), payload_authorName varchar(50) , payload_commitMessage varchar(2000), PRIMARY KEY(payload_repositoryID, payload_shaValue) )');
+                'hive.jdbc.table.create.query' = 'CREATE TABLE GitCommitsSummary ( payload_repositoryID varchar(50) ,
+                payload_shaValue varchar(50), payload_authorDate varchar(50) ,
+ 				payload_authorEMail varchar(50), payload_authorName varchar(50) , payload_commitMessage varchar(2000),
+ 				time_stamp varchar(50), PRIMARY KEY(payload_repositoryID, payload_shaValue) )');
  
-insert overwrite table SummarizedGithubCommitsTable SELECT payload_repositoryID ,  payload_shaValue  , payload_authorDate   , payload_authorEMail  , payload_authorName   , 
-payload_commitMessage  FROM GithubCommitsTable ORDER BY payload_authorDate
+insert overwrite table SummarizedGithubCommitsTable SELECT payload_repositoryID ,  payload_shaValue  , payload_authorDate   ,
+ payload_authorEMail  , payload_authorName   ,
+payload_commitMessage, Time_stamp  FROM GithubCommitsTable ORDER BY Time_stamp ASC
 
                                     

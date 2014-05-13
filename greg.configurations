@@ -4,11 +4,9 @@ BAM_HOME        =   /home/aruna/Desktop/training/wso2bam-2.4.0
 BAM_HOST_NAME   =   localhost
 BAM_PORT        =   7611
 BAM_USERNAME    =   admin
-BAM_PASSWORD    =   admin
 
 GREG_URL        =   https://localhost:9443/admin/registry/
 GREG_USERNAME   =   admin
-GREG_PASSWORD   =   admin
 
 WSO2_BAMBOO_URL =   https://wso2.org/bamboo/rest/api/latest
 WSO2_GIT_URL    =   https://api.github.com/repos/

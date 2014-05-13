@@ -435,22 +435,22 @@ public class GithubConnector implements SourceRepoConnector {
     public List<RepoCommitersData> getLatestCommitersList() {
         return this.commitersList;
     }
-    public static void main(String[] args) {
+    // public static void main(String[] args) {
 
-        for (int i = 0; i < 20; i++) {
+    //     for (int i = 0; i < 20; i++) {
 
-        GithubConnector c = new GithubConnector("carbon-kernel" , "wso2" , "https://api.github.com/repos/" , "token 9c52f8a6a0051059051f8ab3ae9ec110efaa20a5");
+    //     GithubConnector c = new GithubConnector("carbon-kernel" , "wso2" , "https://api.github.com/repos/" , "token 9c52f8a6a0051059051f8ab3ae9ec110efaa20a5");
 
-        System.out.println(c.getRepositoryID());
-        System.out.println(c.getOwnerID());
-        System.out.println(c.getTotalNumberOfCommits());
-        System.out.println(c.getTopContributor());
-        System.out.println(c.getTotalPullRequestCount());
-        System.out.println(c.getLastCommitDateTime());
-        System.out.println(c.getCommitLastYear());
-        System.out.println(c.getLatestCommitsList().toString());
-        System.out.println(c.getLatestCommitersList().toString());
-        }
+    //     System.out.println(c.getRepositoryID());
+    //     System.out.println(c.getOwnerID());
+    //     System.out.println(c.getTotalNumberOfCommits());
+    //     System.out.println(c.getTopContributor());
+    //     System.out.println(c.getTotalPullRequestCount());
+    //     System.out.println(c.getLastCommitDateTime());
+    //     System.out.println(c.getCommitLastYear());
+    //     System.out.println(c.getLatestCommitsList().toString());
+    //     System.out.println(c.getLatestCommitersList().toString());
+    //     }
 
-    }
+    // }
 }
